@@ -23,7 +23,7 @@ public class SFXController : MonoBehaviour {
 		
 		foreach(Collider c in hitColliders){
 			
-			if (c.tag == "ReverbZone")
+			if (c.tag == "AudioZoneOpening")
 			{
 				hitReverbZones.Add(c);
 			}
