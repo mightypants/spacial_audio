@@ -100,7 +100,7 @@ public class FirstPersonController : MonoBehaviour
 
 		if (Input.GetKeyDown(KeyCode.LeftControl))
 		{
-			sfxController.PlaySoundEffect(gunshotAudio);
+			sfxController.PlaySFX(gunshotAudio);
 		}
 
     }
