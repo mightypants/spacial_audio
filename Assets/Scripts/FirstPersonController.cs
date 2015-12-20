@@ -100,7 +100,6 @@ public class FirstPersonController : MonoBehaviour
 
 		if (Input.GetKeyDown(KeyCode.LeftControl))
 		{
-			Debug.Log(this.transform.position);
 			sfxController.PlaySoundEffect(gunshotAudio);
 		}
 
@@ -249,8 +248,8 @@ public class FirstPersonController : MonoBehaviour
 		gunshotAudio.getParameter("distanceFromLargeRm", out distanceFromLargeRm);
 		gunshotAudio.getParameter("distanceFromSmallRm", out distanceFromSmallRm);
 
-		smallRoom = GameObject.Find("Building Small/Building Reverb Trigger");
-		largeRoom = GameObject.Find("Building Large/Building Reverb Trigger");
+		smallRoom = GameObject.Find("Building Small/Audio Zone");
+		largeRoom = GameObject.Find("Building Large/Audio Zone");
 	}
 
 

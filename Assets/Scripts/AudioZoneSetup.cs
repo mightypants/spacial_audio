@@ -8,23 +8,21 @@ public class AudioZoneSetup : MonoBehaviour
 	public FMOD_Listener listener;
 
 	private Transform[] openings;
-
 	private FMOD.Studio.EventInstance reverbPositionSnapshot;
 	
 	void Start() 
 	{
+		// all the openings between this audio zone and adjacent spaces
 		openings = GetComponentsInChildren<Transform>();
 
+		// set up reverb snapshot
 		var system = FMOD_StudioSystem.instance.System;
 		FMOD.Studio.EventDescription description;
-		Debug.Log(snapshotName);
-		Debug.Log(this.name);
-		
 		system.getEvent(snapshotName, out description);
 		description.createInstance(out reverbPositionSnapshot);
-		var attributes = FMOD.Studio.UnityUtil.to3DAttributes(triggerZone.transform.position);
-		reverbPositionSnapshot.set3DAttributes(attributes);
 
+		// set the default opening for audio to leave the zone
+		this.SetAudioExit(openings[0]);
 		reverbPositionSnapshot.start();
 	}
 
@@ -48,5 +46,11 @@ public class AudioZoneSetup : MonoBehaviour
 	{
 		reverbPositionSnapshot.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
 		reverbPositionSnapshot.release();
+	}
+
+	public void SetAudioExit(Transform opening)
+	{
+		var attributes = FMOD.Studio.UnityUtil.to3DAttributes(opening.position);
+		reverbPositionSnapshot.set3DAttributes(attributes);
 	}
 }
