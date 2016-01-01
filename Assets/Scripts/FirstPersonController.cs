@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityStandardAssets.CrossPlatformInput;
 using UnityStandardAssets.Utility;
 using Random = UnityEngine.Random;
+using System.Collections;
 using System.Collections.Generic;
 using FMOD.Studio;
 
@@ -26,13 +27,6 @@ public class FirstPersonController : MonoBehaviour
     [SerializeField] private LerpControlledBob m_JumpBob = new LerpControlledBob();
     [SerializeField] private float m_StepInterval;
 
-	// FMOD audio 
-	private EventInstance gunshotAudio;
-	private ParameterInstance distanceFromSmallRm;
-	private ParameterInstance distanceFromLargeRm;
-	private GameObject largeRoom;
-	private GameObject smallRoom;
-
     private Camera m_Camera;
     private bool m_Jump;
     private float m_YRotation;
@@ -45,6 +39,17 @@ public class FirstPersonController : MonoBehaviour
     private float m_StepCycle;
     private float m_NextStep;
     private bool m_Jumping;
+
+	// audio 
+	private EventInstance gunshotAudio;
+	private ParameterInstance distanceFromSmallRm;
+	private ParameterInstance distanceFromLargeRm;
+	private List<Transform> audioZones;
+	private Transform currAudioZone;
+	private Transform largeRoom;
+	private Transform smallRoom;
+	private Transform currSmallRoomOpening;
+	private Transform currLargeRoomOpening;
 	private SFXController sfxController;
 	
 
@@ -60,7 +65,6 @@ public class FirstPersonController : MonoBehaviour
         m_NextStep = m_StepCycle/2f;
         m_Jumping = false;
 		m_MouseLook.Init(transform , m_Camera.transform);
-		sfxController = gameObject.GetComponent<SFXController>();
 
 		SetupSFX();
     }
@@ -89,24 +93,44 @@ public class FirstPersonController : MonoBehaviour
 
         m_PreviouslyGrounded = m_CharacterController.isGrounded;
 
-		float smallRoomDistance = Vector3.Distance(this.transform.position, smallRoom.transform.position);
+		float smallRoomDistance;
+
+		if (currAudioZone == smallRoom)
+		{
+			smallRoomDistance = 0;
+		}
+		else
+		{
+			smallRoomDistance = Vector3.Distance(this.transform.position, currSmallRoomOpening.position);
+		}
+
 		distanceFromSmallRm.setValue(smallRoomDistance);
-		float largeRoomDistance = Vector3.Distance(this.transform.position, largeRoom.transform.position);
+		float largeRoomDistance;
+
+		if (currAudioZone == largeRoom)
+		{
+			largeRoomDistance = 0;
+
+		}
+		else 
+		{
+			largeRoomDistance = Vector3.Distance(this.transform.position, currLargeRoomOpening.position);
+		}
+
 		distanceFromLargeRm.setValue(largeRoomDistance);
-		
+
 		var attributes = FMOD.Studio.UnityUtil.to3DAttributes(this.transform.position);
 		gunshotAudio.set3DAttributes(attributes);
 
 
-		if (Input.GetKeyDown(KeyCode.LeftControl))
+		if (Input.GetKeyDown(KeyCode.Q))
 		{
-			sfxController.PlaySoundEffect(gunshotAudio);
+
+			StartCoroutine(CallAlpaca());
+
 		}
 
     }
-
-
-
 
     private void FixedUpdate()
     {
@@ -244,15 +268,88 @@ public class FirstPersonController : MonoBehaviour
 
 	private void SetupSFX()
 	{
-		gunshotAudio = FMOD_StudioSystem.instance.GetEvent("event:/gunshot"); 
+		sfxController = gameObject.GetComponent<SFXController>();
+
+		gunshotAudio = FMOD_StudioSystem.instance.GetEvent("event:/flute"); 
 		gunshotAudio.getParameter("distanceFromLargeRm", out distanceFromLargeRm);
 		gunshotAudio.getParameter("distanceFromSmallRm", out distanceFromSmallRm);
 
-		smallRoom = GameObject.Find("Building Small/Audio Zone");
-		largeRoom = GameObject.Find("Building Large/Audio Zone");
+		GameObject s = GameObject.Find("Building Small/Audio Zone");
+		GameObject l = GameObject.Find("Building Large/Audio Zone");
+
+		smallRoom = s.GetComponent<Transform>();
+		largeRoom = l.GetComponent<Transform>();
+
+		InvokeRepeating("FindNearestAudioOpenings", 0, 1);
 	}
 
+	private void FindNearestAudioOpenings()
+	{
+//		if (currLargeRoomOpening != null)
+//		{
+//			Debug.Log(currLargeRoomOpening);
+//			Debug.Log(Vector3.Distance(currLargeRoomOpening.position, this.transform.position));
+//		}
 
+		AudioZoneController smallRoomController = smallRoom.GetComponent<AudioZoneController>();
+		AudioZoneController largeRoomController = largeRoom.GetComponent<AudioZoneController>();
+		float shortestDistance = -1;
+		
+		foreach (Transform o in smallRoom)
+		{
+			float distance = Vector3.Distance(o.position, this.transform.position);
+			
+			if (shortestDistance == -1 || shortestDistance > distance)
+			{
+				shortestDistance = distance;
+				currSmallRoomOpening = o;
+			}
+		}
 
+		smallRoomController.SetActiveOpening(currSmallRoomOpening);
+
+		shortestDistance = -1;
+
+		foreach (Transform o in largeRoom)
+		{
+			float distance = Vector3.Distance(o.position, this.transform.position);
+			
+			if (shortestDistance == -1 || shortestDistance > distance)
+			{
+				shortestDistance = distance;
+				currLargeRoomOpening = o;
+			}
+		}
+		
+		largeRoomController.SetActiveOpening(currLargeRoomOpening);
+	}
+
+	public void NotifyEnteredAudioZone(Transform zone)
+	{
+		currAudioZone = zone;
+	}
+
+	IEnumerator CallAlpaca()
+	{
+		sfxController.PlaySFX(gunshotAudio);
+		yield return new WaitForSeconds(2);
+
+		Collider[] hitColliders = Physics.OverlapSphere(this.transform.position, 15);
+		
+		foreach (Collider c in hitColliders) {
+			
+			AlpacaMovement alpacaMovement = c.gameObject.GetComponent<AlpacaMovement>();
+			
+			if (c.tag == "Alpaca") {
+				alpacaMovement.Hum();
+			}
+		}
+		
+	}
+
+	void FindShortestAudioPath()
+	{
+
+	}
 }
 

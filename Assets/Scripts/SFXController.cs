@@ -23,7 +23,7 @@ public class SFXController : MonoBehaviour {
 		
 		foreach(Collider c in hitColliders){
 			
-			if (c.tag == "ReverbZone")
+			if (c.tag == "AudioZoneOpening")
 			{
 				hitReverbZones.Add(c);
 			}
@@ -37,10 +37,15 @@ public class SFXController : MonoBehaviour {
 		
 	}
 
-	public void PlaySoundEffect(EventInstance soundEffect)
+	public void PlaySFX(EventInstance soundEffect)
 	{
 		soundEffect.start();
 		//soundEffect.release();
 		findAudioTarget();
+	}
+
+	public void UpdateSFXParam(EventInstance soundEffect, ParameterInstance param, float value)
+	{
+
 	}
 }
