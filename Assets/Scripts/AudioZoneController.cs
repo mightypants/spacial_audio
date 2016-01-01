@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using FMOD.Studio;
 
 public class AudioZoneController : MonoBehaviour 
 {
@@ -8,7 +9,7 @@ public class AudioZoneController : MonoBehaviour
 	public FMOD_Listener listener;
 
 	private Transform[] openings;
-	private FMOD.Studio.EventInstance reverbPositionSnapshot;
+	private EventInstance reverbPositionSnapshot;
 	
 	void Start() 
 	{

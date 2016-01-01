@@ -123,7 +123,7 @@ public class FirstPersonController : MonoBehaviour
 		gunshotAudio.set3DAttributes(attributes);
 
 
-		if (Input.GetKeyDown(KeyCode.LeftControl))
+		if (Input.GetKeyDown(KeyCode.Q))
 		{
 
 			StartCoroutine(CallAlpaca());
@@ -280,16 +280,16 @@ public class FirstPersonController : MonoBehaviour
 		smallRoom = s.GetComponent<Transform>();
 		largeRoom = l.GetComponent<Transform>();
 
-		InvokeRepeating("FindNearestAudioOpenings", 0, 2);
+		InvokeRepeating("FindNearestAudioOpenings", 0, 1);
 	}
 
 	private void FindNearestAudioOpenings()
 	{
-		if (currLargeRoomOpening != null)
-		{
-			Debug.Log(currLargeRoomOpening);
-			Debug.Log(Vector3.Distance(currLargeRoomOpening.position, this.transform.position));
-		}
+//		if (currLargeRoomOpening != null)
+//		{
+//			Debug.Log(currLargeRoomOpening);
+//			Debug.Log(Vector3.Distance(currLargeRoomOpening.position, this.transform.position));
+//		}
 
 		AudioZoneController smallRoomController = smallRoom.GetComponent<AudioZoneController>();
 		AudioZoneController largeRoomController = largeRoom.GetComponent<AudioZoneController>();
@@ -334,7 +334,7 @@ public class FirstPersonController : MonoBehaviour
 		sfxController.PlaySFX(gunshotAudio);
 		yield return new WaitForSeconds(2);
 
-		Collider[] hitColliders = Physics.OverlapSphere(this.transform.position, 30);
+		Collider[] hitColliders = Physics.OverlapSphere(this.transform.position, 15);
 		
 		foreach (Collider c in hitColliders) {
 			
@@ -345,6 +345,11 @@ public class FirstPersonController : MonoBehaviour
 			}
 		}
 		
+	}
+
+	void FindShortestAudioPath()
+	{
+
 	}
 }
 
